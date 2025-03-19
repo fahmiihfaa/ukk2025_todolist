@@ -1,12 +1,15 @@
 <?php
 $koneksi = mysqli_connect("localhost", "root", "", "ukk2025_todolist");
 
+date_default_timezone_set('Asia/Jakarta'); 
+
 // tambah task
 if (isset($_POST['add_task'])) {
     $task = $_POST['task'];
     $description = $_POST['description']; 
     $priority = $_POST['priority'];
     $due_date = $_POST['due_date'];
+    $kategori_id = $_POST['kategori_id'];
     
     // Validasi tanggal agar tidak bisa menambahkan task untuk hari sebelumnya
     $today = date('Y-m-d');
@@ -17,7 +20,7 @@ if (isset($_POST['add_task'])) {
     }
     
     if (!empty($task) && !empty($priority) && !empty($due_date)) {
-        mysqli_query($koneksi, "INSERT INTO task (task, description, priority, due_date, status) VALUES ('$task', '$description', '$priority', '$due_date','0')");
+        mysqli_query($koneksi, "INSERT INTO task (task, description, priority, due_date, status, kategori_id) VALUES ('$task', '$description', '$priority', '$due_date','0', '$kategori_id')");
         
         echo "<script>alert('Task berhasil ditambahkan')</script>";
         echo "<script>window.location='index.php';</script>";
@@ -34,6 +37,7 @@ if (isset($_POST['edit_task'])) {
     $description = $_POST['description']; 
     $priority = $_POST['priority'];
     $due_date = $_POST['due_date'];
+    $kategori_id = $_POST['kategori_id'];
     
     // Validasi tanggal agar tidak bisa mengubah task ke hari sebelumnya
     $today = date('Y-m-d');
@@ -44,7 +48,7 @@ if (isset($_POST['edit_task'])) {
     }
     
     if (!empty($task) && !empty($priority) && !empty($due_date)) {
-        mysqli_query($koneksi, "UPDATE task SET task = '$task', description = '$description', priority = '$priority', due_date = '$due_date' WHERE id = '$id'");
+        mysqli_query($koneksi, "UPDATE task SET task = '$task', description = '$description', priority = '$priority', due_date = '$due_date', kategori_id = '$kategori_id' WHERE id = '$id'");
         
         echo "<script>alert('Task berhasil diperbarui')</script>";
         echo "<script>window.location='index.php';</script>";
@@ -52,6 +56,29 @@ if (isset($_POST['edit_task'])) {
         echo "<script>alert('Task gagal diperbarui')</script>";
         echo "<script>window.location='index.php';</script>";
     }
+}
+
+// Buat tabel kategori jika belum ada
+$check_kategori_table = mysqli_query($koneksi, "SHOW TABLES LIKE 'kategori'");
+if (mysqli_num_rows($check_kategori_table) == 0) {
+    mysqli_query($koneksi, "CREATE TABLE kategori (
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        nama_kategori VARCHAR(50) NOT NULL
+    )");
+    
+    // Tambahkan beberapa kategori default
+    mysqli_query($koneksi, "INSERT INTO kategori (nama_kategori) VALUES 
+        ('Pekerjaan'), ('Pribadi'), ('Sekolah'), ('Belanja'), ('Lainnya')");
+}
+
+// Periksa apakah kolom kategori_id sudah ada di tabel task
+$check_column = mysqli_query($koneksi, "SHOW COLUMNS FROM task LIKE 'kategori_id'");
+if (mysqli_num_rows($check_column) == 0) {
+    // Tambahkan kolom kategori_id
+    mysqli_query($koneksi, "ALTER TABLE task ADD COLUMN kategori_id INT(11) DEFAULT 5");
+    
+    // Tambahkan foreign key
+    mysqli_query($koneksi, "ALTER TABLE task ADD CONSTRAINT fk_kategori FOREIGN KEY (kategori_id) REFERENCES kategori(id) ON DELETE SET DEFAULT");
 }
 
 // task selesai
@@ -81,6 +108,7 @@ if (isset($_GET['delete'])) {
 // menampilkan task dengan pencarian, filter prioritas, dan pagination
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $priority_filter = isset($_GET['priority_filter']) ? $_GET['priority_filter'] : '';
+$kategori_filter = isset($_GET['kategori_filter']) ? $_GET['kategori_filter'] : '';
 $where_clause = "";
 
 // Membangun WHERE clause berdasarkan pencarian dan filter prioritas
@@ -94,6 +122,11 @@ if (!empty($search)) {
 if (!empty($priority_filter)) {
     $priority_filter = mysqli_real_escape_string($koneksi, $priority_filter);
     $conditions[] = "priority = '$priority_filter'";
+}
+
+if (!empty($kategori_filter)) {
+    $kategori_filter = mysqli_real_escape_string($koneksi, $kategori_filter);
+    $conditions[] = "kategori_id = '$kategori_filter'";
 }
 
 if (!empty($conditions)) {
@@ -111,7 +144,15 @@ $total_rows = mysqli_fetch_assoc($count_query)['total'];
 $total_pages = ceil($total_rows / $per_page);
 
 // Query untuk mengambil data dengan pagination
-$result = mysqli_query($koneksi, "SELECT * FROM task $where_clause ORDER BY status ASC, priority DESC, due_date ASC LIMIT $start, $per_page");
+$result = mysqli_query($koneksi, "SELECT task.*, kategori.nama_kategori 
+                                  FROM task 
+                                  LEFT JOIN kategori ON task.kategori_id = kategori.id 
+                                  $where_clause 
+                                  ORDER BY status ASC, priority DESC, due_date ASC 
+                                  LIMIT $start, $per_page");
+
+// Ambil semua kategori untuk dropdown
+$kategori_result = mysqli_query($koneksi, "SELECT * FROM kategori ORDER BY nama_kategori ASC");
 
 // Mendapatkan tanggal hari ini untuk validasi input
 $today = date('Y-m-d');
@@ -124,13 +165,16 @@ $incomplete_tasks = $total_tasks - $completed_count;
 $completion_percentage = ($total_tasks > 0) ? round(($completed_count / $total_tasks) * 100) : 0;
 
 // Fungsi untuk membuat URL pagination dengan mempertahankan parameter search dan priority_filter
-function get_pagination_url($page, $search = '', $priority_filter = '') {
+function get_pagination_url($page, $search = '', $priority_filter = '', $kategori_filter = '') {
     $url = "index.php?page=" . $page;
     if (!empty($search)) {
         $url .= "&search=" . urlencode($search);
     }
     if (!empty($priority_filter)) {
         $url .= "&priority_filter=" . urlencode($priority_filter);
+    }
+    if (!empty($kategori_filter)) {
+        $url .= "&kategori_filter=" . urlencode($kategori_filter);
     }
     return $url;
 }
@@ -227,9 +271,20 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
                         <input type="date" name="due_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" min="<?php echo $today; ?>" required>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Deskripsi</label>
-                    <textarea name="description" class="form-control" placeholder="Masukkan deskripsi task (opsional)..." rows="3"></textarea>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="kategori_id" class="form-select" required>
+                            <option value="">--Pilih Kategori--</option>
+                            <?php while ($kategori = mysqli_fetch_assoc($kategori_result)) { ?>
+                                <option value="<?php echo $kategori['id']; ?>"><?php echo htmlspecialchars($kategori['nama_kategori']); ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea name="description" class="form-control" placeholder="Masukkan deskripsi task (opsional)..." rows="3"></textarea>
+                    </div>
                 </div>
                 <button class="btn btn-add-task w-100" name="add_task">
                     <i class="fas fa-plus-circle me-2"></i>Tambah Task
@@ -240,49 +295,78 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
         <!-- Search Box -->
         <div class="task-form search-container">
             <h5 class="mb-3"><i class="fas fa-search me-2"></i>Cari Task</h5>
-            <form action="" method="get" class="row g-3">
-                <div class="col-md-6">
-                    <div class="position-relative">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="search" class="form-control search-input" placeholder="Cari task atau deskripsi..." value="<?php echo htmlspecialchars($search); ?>">
+            <form action="" method="get">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="position-relative d-flex">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="search" class="form-control search-input" placeholder="Cari task atau deskripsi..." value="<?php echo htmlspecialchars($search); ?>">
+                            <button type="submit" class="btn btn-primary search-button ms-2">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                            <?php if (!empty($search) || !empty($priority_filter) || !empty($kategori_filter)) { ?>
+                                    <a href="index.php" class="btn btn-secondary search-clear w-30">
+                                        <i class="fas fa-times me-1"></i>Clear
+                                    </a>
+                            <?php } ?>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <select name="priority_filter" class="form-select">
-                        <option value="">Semua Prioritas</option>
-                        <option value="1" <?php echo ($priority_filter == '1') ? 'selected' : ''; ?>>Low</option>
-                        <option value="2" <?php echo ($priority_filter == '2') ? 'selected' : ''; ?>>Medium</option>
-                        <option value="3" <?php echo ($priority_filter == '3') ? 'selected' : ''; ?>>High</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary search-button">
-                            <i class="fas fa-search me-1"></i>Cari
-                        </button>
-                        <?php if (!empty($search) || !empty($priority_filter)) { ?>
-                            <a href="index.php" class="btn btn-secondary search-clear">
-                                <i class="fas fa-times me-1"></i>Clear
-                            </a>
-                        <?php } ?>
+            
+                    <div class="col-md-12">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <select name="priority_filter" class="form-select">
+                                    <option value="">Semua Prioritas</option>
+                                    <option value="1" <?php echo ($priority_filter == '1') ? 'selected' : ''; ?>>Low</option>
+                                    <option value="2" <?php echo ($priority_filter == '2') ? 'selected' : ''; ?>>Medium</option>
+                                    <option value="3" <?php echo ($priority_filter == '3') ? 'selected' : ''; ?>>High</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="kategori_filter" class="form-select">
+                                    <option value="">Semua Kategori</option>
+                                    <?php 
+                                    // Reset pointer kategori
+                                    mysqli_data_seek($kategori_result, 0);
+                                    while ($kategori = mysqli_fetch_assoc($kategori_result)) { ?>
+                                        <option value="<?php echo $kategori['id']; ?>" <?php echo ($kategori_filter == $kategori['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($kategori['nama_kategori']); ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
-            <?php if (!empty($search) || !empty($priority_filter)) { ?>
+    
+            <?php if (!empty($search) || !empty($priority_filter) || !empty($kategori_filter)) { ?>
                 <p class="search-results mt-2">
                     Menampilkan hasil: 
                     <?php if (!empty($search)) { ?>
                         pencarian untuk "<?php echo htmlspecialchars($search); ?>"
                     <?php } ?>
-                    
-                    <?php if (!empty($search) && !empty($priority_filter)) { ?>
+            
+                    <?php if (!empty($search) && (!empty($priority_filter) || !empty($kategori_filter))) { ?>
                         dengan 
                     <?php } ?>
-                    
+            
                     <?php if (!empty($priority_filter)) { ?>
                         prioritas <?php echo ($priority_filter == '1') ? 'Low' : (($priority_filter == '2') ? 'Medium' : 'High'); ?>
                     <?php } ?>
-                    
+            
+                    <?php if (!empty($priority_filter) && !empty($kategori_filter)) { ?>
+                        dan 
+                    <?php } ?>
+            
+                    <?php if (!empty($kategori_filter)) { 
+                        // Ambil nama kategori
+                        $kategori_name_query = mysqli_query($koneksi, "SELECT nama_kategori FROM kategori WHERE id = '$kategori_filter'");
+                        $kategori_name = mysqli_fetch_assoc($kategori_name_query)['nama_kategori'];
+                    ?>
+                        kategori "<?php echo htmlspecialchars($kategori_name); ?>"
+                    <?php } ?>
+            
                     (<?php echo $total_tasks; ?> hasil)
                 </p>
             <?php } ?>
@@ -302,6 +386,7 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
                             <tr>
                                 <th>No</th>
                                 <th>Task</th>
+                                <th>Kategori</th>
                                 <th>Prioritas</th>
                                 <th>Tenggat</th>
                                 <th>Status</th>
@@ -332,10 +417,25 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
                                 
                                 // Format date
                                 $due_date = date('d M Y', strtotime($row['due_date']));
-                                
                                 // Check if task is due today
                                 $is_due_today = $row['due_date'] == date('Y-m-d');
-                                $date_badge = $is_due_today ? '<span class="badge bg-warning ms-2">Hari Ini</span>' : '';
+
+                                // Tambahkan pengecekan apakah task sudah melewati tenggat waktu
+                                $is_overdue = !$is_completed && strtotime($row['due_date']) < strtotime(date('Y-m-d'));
+
+                                // Tentukan class untuk baris
+                                $row_class = $is_completed ? 'completed-task' : '';
+                                if ($is_overdue) {
+                                    $row_class .= ' overdue-task';
+                                }
+
+                                // Modifikasi date_badge untuk menampilkan peringatan jika sudah melewati tenggat
+                                $date_badge = '';
+                                if ($is_due_today) {
+                                    $date_badge = '<span class="badge bg-warning ms-2">Hari Ini</span>';
+                                } elseif ($is_overdue) {
+                                    $date_badge = '<span class="badge bg-danger ms-2">Tenggat Terlewati!</span>';
+                                }
 
                                 // Tampilkan deskripsi jika ada
                                 $description = !empty($row['description']) ? htmlspecialchars($row['description']) : '<em>Tidak ada deskripsi</em>';
@@ -364,6 +464,11 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
                                             <?php echo $description; ?>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="task-category">
+                                        <?php echo htmlspecialchars($row['nama_kategori']); ?>
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="task-priority <?php echo $priority_class; ?>">
@@ -428,6 +533,17 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
                                                 <div class="mb-3">
                                                     <label for="description" class="form-label">Deskripsi</label>
                                                     <textarea class="form-control" id="description" name="description" rows="3"><?php echo htmlspecialchars($row['description']); ?></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="kategori_id" class="form-label">Kategori</label>
+                                                    <select class="form-select" id="kategori_id" name="kategori_id" required>
+                                                        <?php 
+                                                        // Reset pointer kategori
+                                                        mysqli_data_seek($kategori_result, 0);
+                                                        while ($kategori = mysqli_fetch_assoc($kategori_result)) { ?>
+                                                            <option value="<?php echo $kategori['id']; ?>" <?php echo ($row['kategori_id'] == $kategori['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($kategori['nama_kategori']); ?></option>
+                                                        <?php } ?>
+                                                    </select>
                                                 </div>
                                                 <div class="mb-3">
                                                     <label for="priority" class="form-label">Prioritas</label>
@@ -532,7 +648,7 @@ function get_pagination_url($page, $search = '', $priority_filter = '') {
         
         <!-- Footer -->
         <div class="text-center mt-4 text-muted">
-            <p>UKK RPL 2025 &copy; TaskMaster - Aplikasi Todo List</p>
+            <p>UKK RPL 2025 &copy; TaskFlow - Aplikasi Todo List</p>
         </div>
     </div>
 

@@ -18,7 +18,7 @@ body {
 }
 
 .app-container {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 2rem auto;
 }
 
@@ -238,6 +238,15 @@ body {
     color: #6c757d;
 }
 
+.overdue-task {
+    background-color: rgba(255, 0, 0, 0.05);
+}
+
+.overdue-task .task-date {
+    color: #dc3545;
+    font-weight: 500;
+}
+
 .task-status {
     font-size: 0.85rem;
     font-weight: 500;
@@ -352,33 +361,53 @@ body {
     z-index: 9999;
 }
 
-.search-container {
-    margin-bottom: 20px;
+/* Search container styling */
+.search-container .position-relative.d-flex {
+    align-items: center;
+    flex-wrap: nowrap; /* Prevents wrapping on small screens */
 }
+
+/* Search input styling */
 .search-input {
     border-radius: 20px;
     padding-left: 40px;
-    position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex-grow: 1;
 }
+
+/* Search icon positioning */
 .search-icon {
     position: absolute;
     left: 15px;
-    top: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     color: #6c757d;
+    z-index: 2;
 }
-.search-button {
+
+/* Button styling for consistency */
+.search-button, .search-clear {
     border-radius: 20px;
-    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    white-space: nowrap;
+    margin: 5px;
 }
-.search-clear {
-    border-radius: 20px;
-}
+
+/* Search results text */
 .search-results {
     font-size: 14px;
     margin-top: 10px;
     margin-bottom: 0;
     font-style: italic;
+}
+
+/* Apply consistent styling to form selects */
+.form-select {
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* Gaya untuk menampilkan/menyembunyikan deskripsi */
@@ -389,6 +418,16 @@ body {
 }
 .description-toggle:hover {
     text-decoration: underline;
+}
+
+.task-category {
+    font-size: 0.85rem;
+    border-radius: 15px;
+    padding: 3px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    color: #555;
+    display: inline-block;
 }
 
 @media (max-width: 768px) {
