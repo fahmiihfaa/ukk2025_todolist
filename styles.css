@@ -1,0 +1,411 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --success-color: #4cc9f0;
+    --warning-color: #f72585;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --completed-color: #4ade80;
+    --low-priority: #a7f3d0;
+    --medium-priority: #fcd34d;
+    --high-priority: #f87171;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f2f5;
+    color: var(--dark-color);
+}
+
+.app-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+.app-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.app-title {
+    font-weight: 700;
+    margin-bottom: 0;
+    font-size: 2.2rem;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    flex: 1;
+    margin-right: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:last-child {
+    margin-right: 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 6px;
+}
+
+.task-form {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 0.6rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.15rem rgba(67, 97, 238, 0.25);
+}
+
+.btn-add-task {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-add-task:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+
+.tasks-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.task-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.task-table th {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 12px 15px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.task-table tbody tr {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.task-table tbody tr:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-table td {
+    padding: 15px;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Mengatur tata letak konten task menjadi vertikal */
+.task-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-name {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.completed-task .task-name {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+/* Styling untuk deskripsi task */
+.task-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+    white-space: pre-wrap; /* Mempertahankan line breaks */
+    word-break: break-word; /* Memecah kata yang terlalu panjang */
+    max-height: 80px; /* Batasi tinggi maksimum */
+    overflow-y: auto; /* Tambahkan scrollbar jika terlalu panjang */
+    background-color: #f8f9fa;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border-left: 3px solid #dee2e6;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Melebarkan kolom task untuk memberikan ruang lebih pada deskripsi */
+.task-table .task-column {
+    min-width: 300px;
+    max-width: 400px;
+}
+
+/* Styling untuk scrollbar pada deskripsi */
+.task-description::-webkit-scrollbar {
+    width: 4px;
+}
+
+.task-description::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.task-description::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+/* Hover effect untuk deskripsi */
+.task-description:hover {
+    background-color: #f1f3f5;
+}
+
+.task-priority {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.priority-low {
+    background-color: var(--low-priority);
+    color: #065f46;
+}
+
+.priority-medium {
+    background-color: var(--medium-priority);
+    color: #92400e;
+}
+
+.priority-high {
+    background-color: var(--high-priority);
+    color: #991b1b;
+}
+
+.task-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.task-status {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-incomplete {
+    color: var(--warning-color);
+}
+
+.status-complete {
+    color: var(--completed-color);
+}
+
+.btn-task {
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin-right: 5px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.btn-complete {
+    background-color: var(--completed-color);
+    border-color: var(--completed-color);
+    color: white;
+}
+
+.btn-complete:hover {
+    background-color: #22c55e;
+    border-color: #22c55e;
+}
+
+.btn-undo {
+    background-color: #94a3b8;
+    border-color: #94a3b8;
+    color: white;
+}
+
+.btn-undo:hover {
+    background-color: #64748b;
+    border-color: #64748b;
+}
+
+.btn-edit {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.btn-delete {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.empty-state h5 {
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.empty-state p {
+    color: #9ca3af;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+.search-input {
+    border-radius: 20px;
+    padding-left: 40px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    color: #6c757d;
+}
+.search-button {
+    border-radius: 20px;
+    margin-left: 10px;
+}
+.search-clear {
+    border-radius: 20px;
+}
+.search-results {
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+/* Gaya untuk menampilkan/menyembunyikan deskripsi */
+.description-toggle {
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+.description-toggle:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+    }
+    
+    .stat-card {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .app-title {
+        font-size: 1.8rem;
+    }
+    
+    .task-table td {
+        padding: 10px;
+    }
+}
