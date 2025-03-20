@@ -154,7 +154,6 @@ body {
     border: none;
 }
 
-/* Mengatur tata letak konten task menjadi vertikal */
 .task-content {
     display: flex;
     flex-direction: column;
@@ -170,7 +169,6 @@ body {
     color: #6c757d;
 }
 
-/* Styling untuk deskripsi task */
 .task-description {
     font-size: 0.85rem;
     color: #6c757d;
@@ -186,13 +184,11 @@ body {
     font-style: italic;
 }
 
-/* Melebarkan kolom task untuk memberikan ruang lebih pada deskripsi */
 .task-table .task-column {
     min-width: 300px;
     max-width: 400px;
 }
 
-/* Styling untuk scrollbar pada deskripsi */
 .task-description::-webkit-scrollbar {
     width: 4px;
 }
@@ -206,7 +202,6 @@ body {
     border-radius: 4px;
 }
 
-/* Hover effect untuk deskripsi */
 .task-description:hover {
     background-color: #f1f3f5;
 }
@@ -353,7 +348,6 @@ body {
     color: #9ca3af;
 }
 
-/* Toast notifications */
 .toast-container {
     position: fixed;
     top: 20px;
@@ -361,13 +355,11 @@ body {
     z-index: 9999;
 }
 
-/* Search container styling */
 .search-container .position-relative.d-flex {
     align-items: center;
-    flex-wrap: nowrap; /* Prevents wrapping on small screens */
+    flex-wrap: nowrap; 
 }
 
-/* Search input styling */
 .search-input {
     border-radius: 20px;
     padding-left: 40px;
@@ -375,7 +367,6 @@ body {
     flex-grow: 1;
 }
 
-/* Search icon positioning */
 .search-icon {
     position: absolute;
     left: 15px;
@@ -385,7 +376,6 @@ body {
     z-index: 2;
 }
 
-/* Button styling for consistency */
 .search-button, .search-clear {
     border-radius: 20px;
     display: flex;
@@ -396,7 +386,6 @@ body {
     margin: 5px;
 }
 
-/* Search results text */
 .search-results {
     font-size: 14px;
     margin-top: 10px;
@@ -404,13 +393,11 @@ body {
     font-style: italic;
 }
 
-/* Apply consistent styling to form selects */
 .form-select {
     border-radius: 20px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Gaya untuk menampilkan/menyembunyikan deskripsi */
 .description-toggle {
     cursor: pointer;
     color: #6c757d;

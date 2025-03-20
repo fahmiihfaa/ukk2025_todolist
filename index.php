@@ -437,10 +437,8 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                                     $date_badge = '<span class="badge bg-danger ms-2">Tenggat Terlewati!</span>';
                                 }
 
-                                // Tampilkan deskripsi jika ada
                                 $description = !empty($row['description']) ? htmlspecialchars($row['description']) : '<em>Tidak ada deskripsi</em>';
                                 
-                                // Highlight pencarian di deskripsi
                                 if (!empty($search)) {
                                     $description = preg_replace('/(' . preg_quote($search, '/') . ')/i', '<span class="bg-warning">$1</span>', $description);
                                 }
@@ -452,7 +450,6 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                                         <div class="task-name">
                                             <?php
                                             if (!empty($search)) {
-                                                // Highlight the search term
                                                 $highlighted_text = preg_replace('/(' . preg_quote($search, '/') . ')/i', '<span class="bg-warning">$1</span>', htmlspecialchars($row['task']));
                                                 echo $highlighted_text;
                                             } else {
