@@ -105,6 +105,7 @@ if (isset($_GET['delete'])) {
     echo "<script>window.location='index.php';</script>";
 }
 
+
 // menampilkan task dengan pencarian, filter prioritas, dan pagination
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $priority_filter = isset($_GET['priority_filter']) ? $_GET['priority_filter'] : '';
@@ -192,16 +193,16 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    
 </head>
-<body>
+<body class="<?php echo isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light'; ?>">
     <div class="container app-container">
         <!-- Header -->
-        <div class="app-header text-center">
+        <div class="app-header text-center position-relative">
             <h1 class="app-title">
                 <i class="fas fa-check-circle me-2"></i>TaskFlow
             </h1>
             <p class="mt-2 mb-0">Kelola tugas anda dengan efisien dan lancar</p>
+            <i class="fas fa-moon theme-switch" id="themeSwitch" title="Switch Theme"></i>
         </div>
         
         <!-- Statistics -->
