@@ -20,7 +20,7 @@ if (isset($_POST['add_task'])) {
     }
     
     if (!empty($task) && !empty($priority) && !empty($due_date)) {
-        mysqli_query($koneksi, "INSERT INTO task (task, description, priority, due_date, status, kategori_id) VALUES ('$task', '$description', '$priority', '$due_date','0', '$kategori_id')");
+        mysqli_query($koneksi, "INSERT INTO task (task, description, priority, due_date, status, kategori_id, pinned) VALUES ('$task', '$description', '$priority', '$due_date','0', '$kategori_id', '0')");
         
         echo "<script>alert('Task berhasil ditambahkan')</script>";
         echo "<script>window.location='index.php';</script>";
@@ -81,6 +81,13 @@ if (mysqli_num_rows($check_column) == 0) {
     mysqli_query($koneksi, "ALTER TABLE task ADD CONSTRAINT fk_kategori FOREIGN KEY (kategori_id) REFERENCES kategori(id) ON DELETE SET DEFAULT");
 }
 
+// Periksa apakah kolom pinned sudah ada di tabel task
+$check_pinned_column = mysqli_query($koneksi, "SHOW COLUMNS FROM task LIKE 'pinned'");
+if (mysqli_num_rows($check_pinned_column) == 0) {
+    // Tambahkan kolom pinned
+    mysqli_query($koneksi, "ALTER TABLE task ADD COLUMN pinned TINYINT(1) DEFAULT 0");
+}
+
 // task selesai
 if (isset($_GET['complete'])) {
     $id = $_GET['complete'];
@@ -94,6 +101,22 @@ if (isset($_GET['undo'])) {
     $id = $_GET['undo'];
     mysqli_query($koneksi, "UPDATE task SET status = '0' WHERE id = '$id'");
     echo "<script>alert('Status task berhasil diubah menjadi belum selesai')</script>";
+    echo "<script>window.location='index.php';</script>";
+}
+
+// pin task
+if (isset($_GET['pin'])) {
+    $id = $_GET['pin'];
+    mysqli_query($koneksi, "UPDATE task SET pinned = '1' WHERE id = '$id'");
+    echo "<script>alert('Task berhasil dipin')</script>";
+    echo "<script>window.location='index.php';</script>";
+}
+
+// unpin task
+if (isset($_GET['unpin'])) {
+    $id = $_GET['unpin'];
+    mysqli_query($koneksi, "UPDATE task SET pinned = '0' WHERE id = '$id'");
+    echo "<script>alert('Task berhasil di-unpin')</script>";
     echo "<script>window.location='index.php';</script>";
 }
 
@@ -149,7 +172,7 @@ $result = mysqli_query($koneksi, "SELECT task.*, kategori.nama_kategori
                                   FROM task 
                                   LEFT JOIN kategori ON task.kategori_id = kategori.id 
                                   $where_clause 
-                                  ORDER BY status ASC, priority DESC, due_date ASC 
+                                  ORDER BY pinned DESC, status ASC, priority DESC, due_date ASC 
                                   LIMIT $start, $per_page");
 
 // Ambil semua kategori untuk dropdown
@@ -186,7 +209,7 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | UKK RPL 2025</title>
+    <title>TaskFlow | UKK PPLG 2025</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -399,7 +422,14 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                             $no = (($page - 1) * $per_page) + 1;
                             while ($row = mysqli_fetch_assoc($result)) {
                                 $is_completed = $row['status'] == 1;
+                                $is_pinned = $row['pinned'] == 1;
                                 $row_class = $is_completed ? 'completed-task' : '';
+                                if ($is_pinned) {
+                                    $row_class .= ' pinned-task'; // Add class for pinned tasks
+                                }
+                                if (!$is_completed && strtotime($row['due_date']) < strtotime(date('Y-m-d'))) {
+                                    $row_class .= ' overdue-task'; // Add class for overdue tasks
+                                }
                                 
                                 // Set priority class
                                 $priority_class = '';
@@ -448,7 +478,7 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                                 <td><?php echo $no++; ?></td>
                                 <td class="task-column">
                                     <div class="task-content">
-                                        <div class="task-name">
+                                        <div class="task-names">
                                             <?php
                                             if (!empty($search)) {
                                                 $highlighted_text = preg_replace('/(' . preg_quote($search, '/') . ')/i', '<span class="bg-warning">$1</span>', htmlspecialchars($row['task']));
@@ -507,6 +537,16 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                                         <a href="?delete=<?php echo $row['id']; ?><?php echo !empty($search) ? '&search='.urlencode($search) : ''; ?><?php echo !empty($priority_filter) ? '&priority_filter='.urlencode($priority_filter) : ''; ?><?php echo '&page='.$page; ?>" class="btn btn-task btn-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus task ini?')" title="Hapus Task">
                                             <i class="fas fa-trash"></i>
                                         </a>
+                                        
+                                        <?php if ($row['pinned']) { ?>
+                                            <a href="?unpin=<?php echo $row['id']; ?>" class="btn btn-task btn-unpin ms-2" title="Unpin Task">
+                                                <i class="fas fa-thumbtack"></i> <!-- Icon for unpin -->
+                                            </a>
+                                        <?php } else { ?>
+                                            <a href="?pin=<?php echo $row['id']; ?>" class="btn btn-task btn-pin ms-2" title="Pin Task">
+                                                <i class="far fa-thumbtack"></i> <!-- Icon for pin -->
+                                            </a>
+                                        <?php } ?>
                                     </div>
                                 </td>
                             </tr>
@@ -646,7 +686,7 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
         
         <!-- Footer -->
         <div class="text-center mt-4 text-muted">
-            <p>UKK RPL 2025 &copy; TaskFlow - Aplikasi Todo List</p>
+            <p>UKK PPLG 2025 &copy; TaskFlow - Aplikasi Todo List</p>
         </div>
     </div>
 

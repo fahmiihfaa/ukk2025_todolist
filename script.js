@@ -76,3 +76,21 @@ const urlParams = new URLSearchParams(window.location.search);
             searchInput.focus();
         }
     }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const pinButtons = document.querySelectorAll('.btn-pin, .btn-unpin');
+    pinButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+            row.style.transition = 'transform 0.3s ease';
+            row.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                row.style.transform = 'scale(1)';
+            }, 300);
+
+            const isPin = this.classList.contains('btn-pin');
+            const message = isPin ? 'Task berhasil di-pin!' : 'Task berhasil di-unpin!';
+            showNotification(message, 'success');
+        });
+    });
+});
