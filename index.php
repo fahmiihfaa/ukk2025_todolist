@@ -454,11 +454,11 @@ function get_pagination_url($page, $search = '', $priority_filter = '', $kategor
                                 // Tambahkan pengecekan apakah task sudah melewati tenggat waktu
                                 $is_overdue = !$is_completed && strtotime($row['due_date']) < strtotime(date('Y-m-d'));
 
-                                // Tentukan class untuk baris
-                                $row_class = $is_completed ? 'completed-task' : '';
-                                if ($is_overdue) {
-                                    $row_class .= ' overdue-task';
-                                }
+                                // // Tentukan class untuk baris
+                                // $row_class = $is_completed ? 'completed-task' : '';
+                                // if ($is_overdue) {
+                                //     $row_class .= ' overdue-task';
+                                // }
 
                                 // Modifikasi date_badge untuk menampilkan peringatan jika sudah melewati tenggat
                                 $date_badge = '';

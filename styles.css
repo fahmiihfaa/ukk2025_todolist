@@ -591,6 +591,11 @@ body.dark .btn-delete:hover {
     border-color: #dc2626;
 }
 
+.pinned-task {
+    background-color: #fff9e6;
+    border-left: 4px solid #ffc107;
+}
+
 .modal-content {
     border-radius: 12px;
     border: none;
